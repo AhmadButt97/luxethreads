@@ -1,0 +1,44 @@
+@model LuxeThreads.Models.RegisterViewModel
+@{
+    ViewData["Title"] = "Register";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="page-wrapper">
+    <div class="auth-card">
+        <div class="auth-logo">LUXE<span>THREADS</span></div>
+        <div class="auth-subtitle">Create your account</div>
+
+        <form method="post">
+            <div class="form-group">
+                <label class="form-label">Full Name</label>
+                <input asp-for="FullName" class="form-control" placeholder="Ahmed Raza" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Email Address</label>
+                <input asp-for="Email" class="form-control" type="email" placeholder="you@email.com" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <input asp-for="Password" class="form-control" type="password" placeholder="Min. 8 characters" />
+            </div>
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <input asp-for="ConfirmPassword" class="form-control" type="password" placeholder="Repeat your password" />
+            </div>
+            @if (!ViewData.ModelState.IsValid)
+            {
+                <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.3); color:#f87171; padding:0.75rem; font-size:0.82rem; margin-bottom:1rem;">
+                    @Html.ValidationSummary(true)
+                </div>
+            }
+            <button type="submit" class="btn-submit">Create Account</button>
+        </form>
+
+        <div class="auth-divider">or</div>
+
+        <div style="text-align:center; font-size:0.85rem; color:rgba(245,240,234,0.5);">
+            Already have an account? <a href="/Account/Login" class="auth-link">Sign in</a>
+        </div>
+    </div>
+</div>

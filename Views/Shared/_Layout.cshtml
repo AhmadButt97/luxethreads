@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] — LUXE THREADS</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+    @RenderSection("Styles", required: false)
+    <style>
+        /* ── Navbar ── */
+        .navbar {
+            display: flex; align-items: center; justify-content: space-between;
+            background: #1a1a2e; padding: 0 40px; height: 64px;
+            position: sticky; top: 0; z-index: 999;
+            box-shadow: 0 2px 12px rgba(0,0,0,.4);
+        }
+        .nav-brand {
+            color: white; text-decoration: none; font-size: 22px;
+            font-weight: 800; letter-spacing: 2px;
+        }
+        .nav-brand span { color: #c9a96e; }
+        .nav-links { list-style: none; display: flex; gap: 6px; margin: 0; padding: 0; }
+        .nav-links a {
+            color: #ccc; text-decoration: none; padding: 8px 14px;
+            font-size: 13px; letter-spacing: 1px; font-weight: 600;
+            transition: color .2s; text-transform: uppercase;
+        }
+        .nav-links a:hover { color: #c9a96e; }
+        .nav-actions { display: flex; align-items: center; gap: 14px; }
+        .cart-btn {
+            color: white; text-decoration: none; position: relative;
+            font-size: 20px; transition: color .2s;
+        }
+        .cart-btn:hover { color: #c9a96e; }
+        .cart-count {
+            position: absolute; top: -8px; right: -10px;
+            background: #c9a96e; color: #1a1a2e; border-radius: 50%;
+            width: 18px; height: 18px; font-size: 10px; font-weight: 800;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .btn-nav-login {
+            background: #c9a96e; color: #1a1a2e; text-decoration: none;
+            padding: 8px 18px; font-size: 12px; font-weight: 700;
+            letter-spacing: 1px; transition: opacity .2s;
+        }
+        .btn-nav-login:hover { opacity: .85; }
+
+        /* ── Footer ── */
+        footer {
+            background: #1a1a2e; color: #ccc; padding: 60px 40px 20px;
+        }
+        .footer-grid {
+            display: grid; grid-template-columns: 2fr 1fr 1fr 1fr;
+            gap: 40px; max-width: 1200px; margin: 0 auto 40px;
+        }
+        @@media (max-width: 768px) { .footer-grid { grid-template-columns: 1fr 1fr; } }
+        .footer-brand { color: white; font-size: 20px; font-weight: 800; letter-spacing: 2px; margin-bottom: 14px; }
+        .footer-brand span { color: #c9a96e; }
+        .footer-desc { font-size: 13px; line-height: 1.7; color: #999; }
+        .footer-title { color: white; font-weight: 700; letter-spacing: 1px; font-size: 13px; margin-bottom: 16px; text-transform: uppercase; }
+        .footer-links { list-style: none; padding: 0; margin: 0; }
+        .footer-links li { margin-bottom: 10px; }
+        .footer-links a { color: #999; text-decoration: none; font-size: 13px; transition: color .2s; }
+        .footer-links a:hover { color: #c9a96e; }
+        .footer-bottom {
+            border-top: 1px solid #2a2a3e; padding-top: 20px;
+            display: flex; justify-content: space-between;
+            font-size: 12px; color: #666; max-width: 1200px; margin: 0 auto;
+            flex-wrap: wrap; gap: 8px;
+        }
+
+        /* ── Toast ── */
+        .toast {
+            position: fixed; bottom: 30px; right: 30px;
+            background: #1a1a2e; color: white;
+            padding: 14px 24px; border-left: 4px solid #c9a96e;
+            display: flex; align-items: center; gap: 10px;
+            opacity: 0; transform: translateY(20px);
+            transition: all .3s; pointer-events: none; z-index: 9999;
+            font-size: 14px; box-shadow: 0 4px 20px rgba(0,0,0,.3);
+        }
+        .toast.show { opacity: 1; transform: translateY(0); }
+        .toast-icon { color: #c9a96e; font-size: 18px; }
+    </style>
+</head>
+<body>
+
+<nav class="navbar">
+    <a href="/" class="nav-brand">LUXE<span>THREADS</span></a>
+    <ul class="nav-links">
+        <li><a href="@Url.Action("Index", "Home")">Home</a></li>
+        <li><a href="@Url.Action("Shop", "Home")">Shop</a></li>
+        <li><a href="@Url.Action("Shop", "Home", new { category = "Jackets" })">Jackets</a></li>
+        <li><a href="@Url.Action("Shop", "Home", new { category = "Hoodies" })">Hoodies</a></li>
+        <li><a href="@Url.Action("Shop", "Home", new { category = "Bottoms" })">Bottoms</a></li>
+    </ul>
+    <div class="nav-actions">
+        <a href="@Url.Action("Cart", "Home")" class="cart-btn">
+            <i class="fa fa-bag-shopping"></i>
+            <span class="cart-count" id="cartCount">0</span>
+        </a>
+        @if (User.Identity != null && User.Identity.IsAuthenticated)
+        {
+            if (User.IsInRole("Admin"))
+            {
+                <a href="@Url.Action("Index", "Admin")" class="btn-nav-login">
+                    <i class="fa fa-cog"></i> Admin
+                </a>
+            }
+            <a href="@Url.Action("Logout", "Account")" class="btn-nav-login">Logout</a>
+        }
+        else
+        {
+            <a href="@Url.Action("Login", "Account")" class="btn-nav-login">Login</a>
+        }
+    </div>
+</nav>
+
+@RenderBody()
+
+<footer>
+    <div class="footer-grid">
+        <div>
+            <div class="footer-brand">LUXE<span>THREADS</span></div>
+            <p class="footer-desc">Redefining modern streetwear with premium materials, considered design, and uncompromising quality. For those who wear intention.</p>
+        </div>
+        <div>
+            <div class="footer-title">Shop</div>
+            <ul class="footer-links">
+                <li><a href="@Url.Action("Shop", "Home")">All Products</a></li>
+                <li><a href="@Url.Action("Shop", "Home", new { category = "T-Shirts" })">T-Shirts</a></li>
+                <li><a href="@Url.Action("Shop", "Home", new { category = "Hoodies" })">Hoodies</a></li>
+                <li><a href="@Url.Action("Shop", "Home", new { category = "Jackets" })">Jackets</a></li>
+                <li><a href="@Url.Action("Shop", "Home", new { category = "Bottoms" })">Bottoms</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-title">Help</div>
+            <ul class="footer-links">
+                <li><a href="#">Size Guide</a></li>
+                <li><a href="#">Shipping Info</a></li>
+                <li><a href="#">Returns</a></li>
+                <li><a href="#">FAQ</a></li>
+            </ul>
+        </div>
+        <div>
+            <div class="footer-title">Connect</div>
+            <ul class="footer-links">
+                <li><a href="#">Instagram</a></li>
+                <li><a href="#">TikTok</a></li>
+                <li><a href="#">Pinterest</a></li>
+                <li><a href="#">Newsletter</a></li>
+            </ul>
+        </div>
+    </div>
+    <div class="footer-bottom">
+        <span>© 2025 LuxeThreads. All rights reserved.</span>
+        <span>Pakistan's Premier Luxury Streetwear Brand</span>
+    </div>
+</footer>
+
+<div class="toast" id="toast">
+    <span class="toast-icon"><i class="fa fa-check-circle"></i></span>
+    <span id="toastMsg">Added to cart!</span>
+</div>
+
+<script>
+function showToast(msg) {
+    const t = document.getElementById('toast');
+    document.getElementById('toastMsg').textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// Show TempData toast if present
+@if (TempData["Message"] != null)
+{
+    <text>window.addEventListener('DOMContentLoaded', () => showToast('@TempData["Message"]'));</text>
+}
+</script>
+@RenderSection("Scripts", required: false)
+</body>
+</html>

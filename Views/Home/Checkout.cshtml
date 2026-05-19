@@ -1,0 +1,94 @@
+@model LuxeThreads.Models.CheckoutViewModel
+@{
+    ViewData["Title"] = "Checkout";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container" style="max-width: 1200px; margin: 0 auto; padding: 40px 20px;">
+    <h1 style="margin-bottom: 30px;">Checkout</h1>
+    
+    <div style="display: flex; flex-wrap: wrap; gap: 40px;">
+        <!-- Checkout Form -->
+        <div style="flex: 2; min-width: 300px;">
+            <form method="post" action="/Home/PlaceOrder">
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 20px;">Shipping Information</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Full Name</label>
+                        <input type="text" name="FullName" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Email</label>
+                        <input type="email" name="Email" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Address</label>
+                        <input type="text" name="Address" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">City</label>
+                        <input type="text" name="City" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Zip Code</label>
+                        <input type="text" name="ZipCode" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                </div>
+                
+                <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+                    <h3 style="margin-bottom: 20px;">Payment Information</h3>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <label style="display: block; margin-bottom: 5px;">Card Number</label>
+                        <input type="text" name="CardNumber" required placeholder="4111 1111 1111 1111" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                    </div>
+                    
+                    <div style="display: flex; gap: 15px;">
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px;">Expiry Date</label>
+                            <input type="text" name="CardExpiry" required placeholder="MM/YY" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                        <div style="flex: 1;">
+                            <label style="display: block; margin-bottom: 5px;">CVV</label>
+                            <input type="text" name="CardCvv" required placeholder="123" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                        </div>
+                    </div>
+                </div>
+                
+                <button type="submit" style="background: #c9a96e; color: #1a1a2e; border: none; padding: 15px 30px; border-radius: 5px; cursor: pointer; font-size: 16px; width: 100%;">
+                    Place Order - $@Model.Total.ToString("F2")
+                </button>
+            </form>
+        </div>
+        
+        <!-- Order Summary -->
+        <div style="flex: 1; min-width: 280px;">
+            <div style="background: #1a1a2e; color: white; padding: 20px; border-radius: 10px; position: sticky; top: 20px;">
+                <h3 style="margin-bottom: 20px; color: #c9a96e;">Order Summary</h3>
+                
+                @foreach (var item in Model.CartItems)
+                {
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #333;">
+                        <div>
+                            <div>@item.ProductName</div>
+                            <small style="color: #c9a96e;">Size: @item.Size x @item.Quantity</small>
+                        </div>
+                        <div>$@((item.Price * item.Quantity).ToString("F2"))</div>
+                    </div>
+                }
+                
+                <div style="margin-top: 20px; padding-top: 20px; border-top: 2px solid #c9a96e;">
+                    <div style="display: flex; justify-content: space-between; font-size: 18px; font-weight: bold;">
+                        <span>Total</span>
+                        <span style="color: #c9a96e;">$@Model.Total.ToString("F2")</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

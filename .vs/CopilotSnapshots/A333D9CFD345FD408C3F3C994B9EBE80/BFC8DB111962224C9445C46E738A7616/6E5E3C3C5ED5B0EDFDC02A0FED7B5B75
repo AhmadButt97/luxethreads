@@ -1,0 +1,77 @@
+﻿namespace LuxeThreads.Models
+{
+    public class Product
+    {
+        public int Id { get; set; }
+        public string Name { get; set; } = "";
+        public string Description { get; set; } = "";
+        public decimal Price { get; set; }
+        public string Category { get; set; } = "";
+        public string ImageUrl { get; set; } = "";
+        public string Badge { get; set; } = ""; // NEW, SALE, HOT
+        public decimal? OldPrice { get; set; }
+        public bool IsAvailable { get; set; } = true;
+        public int Stock { get; set; } = 100;
+    }
+
+    public class CartItem
+    {
+        public int ProductId { get; set; }
+        public string ProductName { get; set; } = "";
+        public decimal Price { get; set; }
+        public int Quantity { get; set; }
+        public string ImageUrl { get; set; } = "";
+    }
+
+    public class Order
+    {
+        public int Id { get; set; }
+        public string CustomerName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Address { get; set; } = "";
+        public decimal Total { get; set; }
+        public string Status { get; set; } = "Pending";
+        public DateTime OrderDate { get; set; } = DateTime.Now;
+        public List<CartItem> Items { get; set; } = new();
+    }
+
+    public class LoginViewModel
+    {
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public bool RememberMe { get; set; }
+    }
+
+    public class RegisterViewModel
+    {
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Password { get; set; } = "";
+        public string ConfirmPassword { get; set; } = "";
+    }
+
+    public class PaymentViewModel
+    {
+        public string CardHolder { get; set; } = "";
+        public string CardNumber { get; set; } = "";
+        public string ExpiryMonth { get; set; } = "";
+        public string ExpiryYear { get; set; } = "";
+        public string CVV { get; set; } = "";
+        public string FullName { get; set; } = "";
+        public string Email { get; set; } = "";
+        public string Address { get; set; } = "";
+        public string City { get; set; } = "";
+        public string ZipCode { get; set; } = "";
+        public decimal Total { get; set; }
+    }
+
+    public class AdminDashboard
+    {
+        public int TotalOrders { get; set; }
+        public decimal TotalRevenue { get; set; }
+        public int TotalProducts { get; set; }
+        public int TotalCustomers { get; set; }
+        public List<Order> RecentOrders { get; set; } = new();
+        public List<Product> Products { get; set; } = new();
+    }
+}

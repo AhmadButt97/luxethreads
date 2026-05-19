@@ -1,0 +1,27 @@
+@model LuxeThreads.Models.Product
+@{
+    ViewData["Title"] = Model.Name;
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container">
+    <h1>@Model.Name</h1>
+    <p>@Model.Description</p>
+    <p>Price: $@Model.Price.ToString("F2")</p>
+    
+    @* FIXED: Changed HasValue to > 0 *@
+    @if (Model.OldPrice > 0)
+    {
+        <p class="old-price">Was: $@Model.OldPrice.ToString("F2")</p>
+    }
+    
+    <p>Category: @Model.Category</p>
+    <p>Stock: @Model.Stock</p>
+    
+    <form method="post" action="/Home/AddToCart">
+        <input type="hidden" name="productId" value="@Model.Id">
+        <input type="hidden" name="size" value="M">
+        <input type="hidden" name="quantity" value="1">
+        <button type="submit">Add to Cart</button>
+    </form>
+</div>

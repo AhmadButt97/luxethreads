@@ -1,0 +1,167 @@
+@model List<LuxeThreads.Models.CartItem>
+@{
+    ViewData["Title"] = "Cart";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var subtotal = Model != null ? Model.Sum(c => c.Price * c.Quantity) : 0;
+    var shipping = subtotal >= 150 ? 0m : 9.99m;   // ✅ Free shipping over $150
+    var total = subtotal + shipping;                 // ✅ Fixed: total includes shipping
+}
+
+<style>
+    .cart-page { max-width: 1200px; margin: 0 auto; padding: 50px 20px; }
+    .cart-header { font-family: Georgia,serif; font-size: 42px; margin-bottom: 40px; color: #1a1a2e; }
+    .empty-cart { text-align:center; padding: 100px 20px; }
+    .empty-cart-icon { font-size: 60px; color: #c9a96e; margin-bottom: 20px; }
+    .empty-cart h3 { font-size: 28px; margin-bottom: 12px; }
+    .btn-primary {
+        background: #c9a96e; color: #1a1a2e; padding: 14px 32px;
+        text-decoration: none; font-weight: 700; letter-spacing: 1px;
+        border: none; cursor: pointer; display: inline-block; transition: opacity .2s;
+    }
+    .btn-primary:hover { opacity: .85; }
+    .cart-grid { display: grid; grid-template-columns: 1fr 360px; gap: 3rem; align-items: start; }
+    @@media (max-width: 900px) { .cart-grid { grid-template-columns: 1fr; } }
+    .cart-table-head {
+        display: grid; grid-template-columns: 90px 1fr auto auto;
+        gap: 1rem; padding: .75rem 0; border-bottom: 2px solid #1a1a2e;
+        font-size: 11px; font-weight: 700; letter-spacing: 2px;
+        text-transform: uppercase; color: #888;
+    }
+    .cart-item-row {
+        display: grid; grid-template-columns: 90px 1fr auto auto;
+        gap: 1rem; padding: 1.5rem 0; border-bottom: 1px solid #eee;
+        align-items: center;
+    }
+    .cart-item-img {
+        width: 90px; height: 110px; object-fit: cover;
+        background: #1a1a2e;
+    }
+    .cart-item-name { font-weight: 700; font-size: 15px; margin-bottom: 4px; }
+    .cart-item-meta { font-size: 13px; color: #888; margin-bottom: 4px; }
+    .cart-item-price { font-size: 13px; color: #c9a96e; font-weight: 600; margin-bottom: 8px; }
+    .btn-remove {
+        background: none; border: none; color: #999; cursor: pointer;
+        font-size: 12px; padding: 0; display: flex; align-items: center; gap: 5px;
+        transition: color .2s;
+    }
+    .btn-remove:hover { color: #e74c3c; }
+    .qty-display { font-size: 16px; font-weight: 600; color: #1a1a2e; }
+    .item-total { font-family: Georgia,serif; font-size: 18px; font-weight: 700; color: #1a1a2e; }
+
+    /* Summary box */
+    .summary-box { background: #1a1a2e; color: white; padding: 2rem; position: sticky; top: 90px; }
+    .summary-title { font-family: Georgia,serif; font-size: 22px; color: #c9a96e; margin-bottom: 1.5rem; }
+    .summary-row {
+        display: flex; justify-content: space-between;
+        padding: .5rem 0; border-bottom: 1px solid rgba(255,255,255,.07);
+        font-size: 14px;
+    }
+    .summary-row span:first-child { color: rgba(255,255,255,.55); }
+    .summary-total {
+        display: flex; justify-content: space-between; padding: 1.25rem 0;
+        border-top: 1px solid rgba(255,255,255,.15); margin-top: .5rem;
+    }
+    .summary-total span { font-family: Georgia,serif; font-size: 22px; color: #c9a96e; }
+    .free-ship { font-size: 12px; color: #22c55e; margin-top: 8px; text-align: center; }
+</style>
+
+<div class="cart-page">
+    <h1 class="cart-header">Your <em style="font-style:italic; color:#888;">Cart</em></h1>
+
+    @if (Model == null || !Model.Any())
+    {
+        <div class="empty-cart">
+            <div class="empty-cart-icon"><i class="fa fa-bag-shopping"></i></div>
+            <h3>Your cart is empty</h3>
+            <p style="color:#888; margin-bottom:2rem;">Add some pieces to your cart to get started.</p>
+            <a href="@Url.Action("Shop","Home")" class="btn-primary">Browse Collection</a>
+        </div>
+    }
+    else
+    {
+        <div class="cart-grid">
+            <!-- ── Items ── -->
+            <div>
+                <div class="cart-table-head">
+                    <div></div>
+                    <div>Product</div>
+                    <div>Qty</div>
+                    <div>Total</div>
+                </div>
+
+                @foreach (var item in Model)
+                {
+                    <div class="cart-item-row">
+                        <img src="@item.ImageUrl" alt="@item.ProductName" class="cart-item-img"
+                             onerror="this.src='https://images.unsplash.com/photo-1523381210434-271e8be1f52b?w=200&q=80'" />
+                        <div>
+                            <div class="cart-item-name">@item.ProductName</div>
+                            <div class="cart-item-meta">Size: @item.Size</div>
+                            <div class="cart-item-price">$@item.Price.ToString("F2") each</div>
+                            <!-- ✅ Fixed: correct field names matching HomeController -->
+                            <form method="post" action="@Url.Action("RemoveFromCart","Home")" style="display:inline;">
+                                @Html.AntiForgeryToken()
+                                <input type="hidden" name="productId" value="@item.ProductId" />
+                                <input type="hidden" name="size" value="@item.Size" />
+                                <button type="submit" class="btn-remove">
+                                    <i class="fa fa-trash"></i> Remove
+                                </button>
+                            </form>
+                        </div>
+                        <div class="qty-display">×@item.Quantity</div>
+                        <div class="item-total">$@((item.Price * item.Quantity).ToString("F2"))</div>
+                    </div>
+                }
+            </div>
+
+            <!-- ── Summary ── -->
+            <div class="summary-box">
+                <div class="summary-title">Order Summary</div>
+
+                @foreach (var item in Model)
+                {
+                    <div class="summary-row">
+                        <span>@item.ProductName ×@item.Quantity</span>
+                        <span>$@((item.Price * item.Quantity).ToString("F2"))</span>
+                    </div>
+                }
+
+                <div class="summary-row">
+                    <span>Subtotal</span>
+                    <span>$@subtotal.ToString("F2")</span>
+                </div>
+
+                <div class="summary-row">
+                    <span>Shipping</span>
+                    <!-- ✅ Fixed: shipping shown AND included in total -->
+                    <span style="color:@(shipping == 0 ? "#22c55e" : "white");">
+                        @(shipping == 0 ? "FREE" : "$" + shipping.ToString("F2"))
+                    </span>
+                </div>
+
+                <div class="summary-total">
+                    <span>Total</span>
+                    <!-- ✅ Fixed: total = subtotal + shipping -->
+                    <span>$@total.ToString("F2")</span>
+                </div>
+
+                @if (subtotal < 150)
+                {
+                    <p class="free-ship">
+                        Add $@((150 - subtotal).ToString("F2")) more for FREE shipping!
+                    </p>
+                }
+
+                <a href="@Url.Action("Checkout","Home")" class="btn-primary"
+                   style="width:100%; text-align:center; display:block; margin-top:1.5rem; box-sizing:border-box;">
+                    PROCEED TO CHECKOUT &nbsp;<i class="fa fa-arrow-right"></i>
+                </a>
+                <a href="@Url.Action("Shop","Home")"
+                   style="display:block; text-align:center; margin-top:1rem;
+                          color:rgba(255,255,255,.35); font-size:13px; text-decoration:none;">
+                    ← Continue Shopping
+                </a>
+            </div>
+        </div>
+    }
+</div>

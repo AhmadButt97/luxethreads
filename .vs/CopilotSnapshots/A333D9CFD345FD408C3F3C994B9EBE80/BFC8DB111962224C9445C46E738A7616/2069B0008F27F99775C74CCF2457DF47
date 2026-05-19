@@ -1,0 +1,100 @@
+﻿using LuxeThreads.Data;
+using LuxeThreads.Models;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+
+namespace LuxeThreads.Controllers
+{
+    [Authorize(Roles = "Admin")]
+    public class AdminController : Controller
+    {
+        private readonly AppDbContext _db;
+        public AdminController(AppDbContext db) { _db = db; }
+
+        public IActionResult Index()
+        {
+            var orders = _db.Orders.ToList();
+            if (!orders.Any()) orders = DataSeeder.SeedOrders();
+
+            // Ensure Items are populated from ItemsJson
+            foreach (var o in orders)
+            {
+                if (!string.IsNullOrEmpty(o.ItemsJson) && (o.Items == null || !o.Items.Any()))
+                {
+                    try { o.Items = JsonSerializer.Deserialize<List<CartItem>>(o.ItemsJson) ?? new List<CartItem>(); }
+                    catch { o.Items = new List<CartItem>(); }
+                }
+            }
+
+            var dashboard = new AdminDashboard
+            {
+                TotalOrders = orders.Count,
+                TotalRevenue = orders.Sum(o => o.Total),
+                TotalProducts = _db.Products.Count(),
+                TotalCustomers = 4,
+                RecentOrders = orders.OrderByDescending(o => o.OrderDate).Take(5).ToList(),
+                Products = _db.Products.ToList()
+            };
+            return View(dashboard);
+        }
+
+        public IActionResult Products() => View(_db.Products.ToList());
+
+        [HttpGet]
+        public IActionResult AddProduct() => View(new Product());
+
+        [HttpPost]
+        public IActionResult AddProduct(Product product)
+        {
+            if (!ModelState.IsValid) return View(product);
+            _db.Products.Add(product);
+            _db.SaveChanges();
+            TempData["Success"] = "Product added successfully!";
+            return RedirectToAction("Products");
+        }
+
+        [HttpGet]
+        public IActionResult EditProduct(int id)
+        {
+            var p = _db.Products.Find(id);
+            if (p == null) return NotFound();
+            return View(p);
+        }
+
+        [HttpPost]
+        public IActionResult EditProduct(Product product)
+        {
+            if (!ModelState.IsValid) return View(product);
+            _db.Products.Update(product);
+            _db.SaveChanges();
+            TempData["Success"] = "Product updated!";
+            return RedirectToAction("Products");
+        }
+
+        [HttpPost]
+        public IActionResult DeleteProduct(int id)
+        {
+            var p = _db.Products.Find(id);
+            if (p != null) { _db.Products.Remove(p); _db.SaveChanges(); }
+            return RedirectToAction("Products");
+        }
+
+        public IActionResult Orders()
+        {
+            var orders = _db.Orders.ToList();
+            if (!orders.Any()) orders = DataSeeder.SeedOrders();
+
+            foreach (var o in orders)
+            {
+                if (!string.IsNullOrEmpty(o.ItemsJson) && (o.Items == null || !o.Items.Any()))
+                {
+                    try { o.Items = JsonSerializer.Deserialize<List<CartItem>>(o.ItemsJson) ?? new List<CartItem>(); }
+                    catch { o.Items = new List<CartItem>(); }
+                }
+            }
+
+            return View(orders);
+        }
+    }
+}

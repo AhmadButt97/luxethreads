@@ -1,0 +1,125 @@
+@model List<LuxeThreads.Models.Product>
+@{
+    ViewData["Title"] = "Manage Products";
+    Layout = null;
+}
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Products - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f5f5; }
+        .admin-layout { display: flex; }
+        .admin-sidebar {
+            width: 260px;
+            background: #1a1a2e;
+            color: white;
+            min-height: 100vh;
+        }
+        .admin-brand { font-size: 24px; padding: 30px 20px; border-bottom: 1px solid #333; }
+        .admin-brand span { color: #c9a96e; }
+        .admin-nav { padding: 20px 0; }
+        .admin-nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 20px;
+            color: white;
+            text-decoration: none;
+            gap: 12px;
+        }
+        .admin-nav-item:hover { background: #c9a96e; color: #1a1a2e; }
+        .admin-content { flex: 1; }
+        .admin-topbar {
+            background: white;
+            padding: 20px;
+            display: flex;
+            justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .admin-body { padding: 30px; }
+        .btn-admin {
+            background: #c9a96e;
+            color: #1a1a2e;
+            padding: 10px 20px;
+            text-decoration: none;
+            display: inline-block;
+            border: none;
+            cursor: pointer;
+        }
+        .admin-table {
+            width: 100%;
+            background: white;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .admin-table th, .admin-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+        .admin-table th { background: #f5f5f5; }
+        .product-thumb {
+            width: 50px;
+            height: 50px;
+            background: #1a1a2e;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-brand">LUXE<span>THREADS</span></div>
+        <nav class="admin-nav">
+            <a href="/Admin" class="admin-nav-item"><i class="fa fa-dashboard"></i> Dashboard</a>
+            <a href="/Admin/Products" class="admin-nav-item"><i class="fa fa-shirt"></i> Products</a>
+            <a href="/Admin/Orders" class="admin-nav-item"><i class="fa fa-box"></i> Orders</a>
+            <a href="/Admin/AddProduct" class="admin-nav-item"><i class="fa fa-plus"></i> Add Product</a>
+        </nav>
+    </aside>
+    <main class="admin-content">
+        <div class="admin-topbar">
+            <h2>Products</h2>
+            <a href="/Admin/AddProduct" class="btn-admin">+ Add New Product</a>
+        </div>
+        <div class="admin-body">
+            <table class="admin-table">
+                <thead>
+                    <tr><th>ID</th><th>Image</th><th>Name</th><th>Category</th><th>Price</th><th>Stock</th><th>Actions</th></tr>
+                </thead>
+                <tbody>
+                    @foreach (var p in Model)
+                    {
+                        <tr>
+                            <td>@p.Id</td>
+                            <td>
+                                <div class="product-thumb">
+                                    <span style="color: @p.AccentHex;">👕</span>
+                                </div>
+                            </td>
+                            <td>@p.Name</td>
+                            <td>@p.Category</td>
+                            <td>$@p.Price.ToString("F2")</td>
+                            <td>@p.Stock</td>
+                            <td>
+                                <a href="/Admin/EditProduct/@p.Id" style="color: #c9a96e; margin-right: 10px;">Edit</a>
+                                <form method="post" action="/Admin/DeleteProduct" style="display: inline;" onsubmit="return confirm('Delete this product?')">
+                                    <input type="hidden" name="id" value="@p.Id">
+                                    <button type="submit" style="background: none; border: none; color: red; cursor: pointer;">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </main>
+</div>
+</body>
+</html>

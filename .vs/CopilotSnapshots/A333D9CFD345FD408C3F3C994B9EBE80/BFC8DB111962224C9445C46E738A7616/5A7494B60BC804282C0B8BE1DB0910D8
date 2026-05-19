@@ -1,0 +1,120 @@
+﻿using LuxeThreads.Data;
+using LuxeThreads.Models;
+using Microsoft.AspNetCore.Mvc;
+using System.Text.Json;
+
+namespace LuxeThreads.Controllers
+{
+    public class HomeController : Controller
+    {
+        private readonly AppDbContext _db;
+        public HomeController(AppDbContext db) { _db = db; }
+
+        public IActionResult Index()
+        {
+            var featured = _db.Products.Take(4).ToList();
+            return View(featured);
+        }
+
+        public IActionResult Shop(string? category, string? search)
+        {
+            var products = _db.Products.AsQueryable();
+            if (!string.IsNullOrEmpty(category))
+                products = products.Where(p => p.Category == category);
+            if (!string.IsNullOrEmpty(search))
+                products = products.Where(p => p.Name.Contains(search) || p.Description.Contains(search));
+            ViewBag.Category = category;
+            ViewBag.Search = search;
+            ViewBag.Categories = _db.Products.Select(p => p.Category).Distinct().ToList();
+            return View(products.ToList());
+        }
+
+        public IActionResult Product(int id)
+        {
+            var product = _db.Products.Find(id);
+            if (product == null) return NotFound();
+            ViewBag.Related = _db.Products.Where(p => p.Category == product.Category && p.Id != id).Take(4).ToList();
+            return View(product);
+        }
+
+        public IActionResult Cart()
+        {
+            var cart = GetCart();
+            return View(cart);
+        }
+
+        [HttpPost]
+        public IActionResult AddToCart(int id, int qty = 1)
+        {
+            var product = _db.Products.Find(id);
+            if (product == null) return Json(new { success = false });
+            var cart = GetCart();
+            var existing = cart.FirstOrDefault(c => c.ProductId == id);
+            if (existing != null)
+                existing.Quantity += qty;
+            else
+                cart.Add(new CartItem { ProductId = id, ProductName = product.Name, Price = product.Price, Quantity = qty, ImageUrl = product.ImageUrl });
+            SaveCart(cart);
+            return Json(new { success = true, count = cart.Sum(c => c.Quantity) });
+        }
+
+        [HttpPost]
+        public IActionResult RemoveFromCart(int id)
+        {
+            var cart = GetCart();
+            cart.RemoveAll(c => c.ProductId == id);
+            SaveCart(cart);
+            return RedirectToAction("Cart");
+        }
+
+        public IActionResult Checkout()
+        {
+            var cart = GetCart();
+            if (!cart.Any()) return RedirectToAction("Cart");
+            var vm = new PaymentViewModel { Total = cart.Sum(c => c.Price * c.Quantity) };
+            ViewBag.Cart = cart;
+            return View(vm);
+        }
+
+        [HttpPost]
+        public IActionResult Checkout(PaymentViewModel vm)
+        {
+            var cart = GetCart();
+            var order = new Order
+            {
+                CustomerName = vm.FullName,
+                Email = vm.Email,
+                Address = $"{vm.Address}, {vm.City} {vm.ZipCode}",
+                Total = cart.Sum(c => c.Price * c.Quantity),
+                Status = "Processing",
+                Items = cart
+            };
+
+            // Serialize items into ItemsJson so EF can persist them in the Orders table
+            order.ItemsJson = JsonSerializer.Serialize(order.Items);
+
+            _db.Orders.Add(order);
+            _db.SaveChanges();
+            SaveCart(new List<CartItem>());
+            TempData["OrderSuccess"] = order.Id;
+            return RedirectToAction("OrderSuccess");
+        }
+
+        public IActionResult OrderSuccess()
+        {
+            ViewBag.OrderId = TempData["OrderSuccess"];
+            return View();
+        }
+
+        private List<CartItem> GetCart()
+        {
+            var json = HttpContext.Session.GetString("Cart");
+            return string.IsNullOrEmpty(json) ? new List<CartItem>() : JsonSerializer.Deserialize<List<CartItem>>(json)!;
+        }
+
+        private void SaveCart(List<CartItem> cart)
+        {
+            HttpContext.Session.SetString("Cart", JsonSerializer.Serialize(cart));
+        }
+    }
+}

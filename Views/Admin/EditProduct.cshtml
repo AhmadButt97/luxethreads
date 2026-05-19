@@ -1,0 +1,98 @@
+@model LuxeThreads.Models.Product
+@{
+    ViewData["Title"] = "Add Product";
+    Layout = null;
+    bool isEdit = Model.Id > 0;
+}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>@(isEdit ? "Edit" : "Add") Product — LuxeThreads Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    <link rel="stylesheet" href="~/css/site.css" />
+</head>
+<body>
+<div class="admin-layout">
+    <aside class="admin-sidebar">
+        <div class="admin-brand">LUXE<span>THREADS</span></div>
+        <nav class="admin-nav">
+            <a href="/Admin" class="admin-nav-item"><i class="fa fa-gauge-high"></i> <span>Dashboard</span></a>
+            <a href="/Admin/Products" class="admin-nav-item"><i class="fa fa-shirt"></i> <span>Products</span></a>
+            <a href="/Admin/Orders" class="admin-nav-item"><i class="fa fa-box"></i> <span>Orders</span></a>
+            <a href="/Admin/AddProduct" class="admin-nav-item active"><i class="fa fa-plus"></i> <span>Add Product</span></a>
+        </nav>
+        <div style="padding:1.5rem 2rem; border-top:1px solid var(--border);">
+            <a href="/" class="admin-nav-item" style="padding:0;"><i class="fa fa-store"></i> <span>View Store</span></a>
+            <a href="/Account/Logout" class="admin-nav-item" style="padding:0.5rem 0 0;"><i class="fa fa-right-from-bracket"></i> <span>Logout</span></a>
+        </div>
+    </aside>
+
+    <main class="admin-content">
+        <div class="admin-topbar">
+            <h2>@(isEdit ? "Edit Product" : "Add New Product")</h2>
+            <a href="/Admin/Products" class="btn-admin btn-admin-sm"><i class="fa fa-arrow-left"></i> Back</a>
+        </div>
+        <div class="admin-body">
+            <div class="form-card">
+                <form method="post" action="@(isEdit ? "/Admin/EditProduct" : "/Admin/AddProduct")">
+                    @if (isEdit) { <input type="hidden" asp-for="Id" /> }
+                    <div class="form-grid">
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">Product Name</label>
+                            <input asp-for="Name" class="form-control-admin" placeholder="e.g. Obsidian Tee" required />
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">Category</label>
+                            <select asp-for="Category" class="form-control-admin" required>
+                                <option value="">Select Category</option>
+                                <option>T-Shirts</option>
+                                <option>Hoodies</option>
+                                <option>Jackets</option>
+                                <option>Bottoms</option>
+                                <option>Accessories</option>
+                            </select>
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">Price (PKR)</label>
+                            <input asp-for="Price" type="number" step="0.01" class="form-control-admin" placeholder="0.00" required />
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">Old Price (PKR) — Optional</label>
+                            <input asp-for="OldPrice" type="number" step="0.01" class="form-control-admin" placeholder="0.00" />
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">Stock Quantity</label>
+                            <input asp-for="Stock" type="number" class="form-control-admin" placeholder="100" required />
+                        </div>
+                        <div class="form-group-admin">
+                            <label class="form-label-admin">Badge</label>
+                            <select asp-for="Badge" class="form-control-admin">
+                                <option value="">None</option>
+                                <option>NEW</option>
+                                <option>SALE</option>
+                                <option>HOT</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-group-admin">
+                        <label class="form-label-admin">Description</label>
+                        <textarea asp-for="Description" class="form-control-admin" rows="3" placeholder="Product description..."></textarea>
+                    </div>
+                    <div class="form-group-admin">
+                        <label class="form-label-admin">Image URL</label>
+                        <input asp-for="ImageUrl" class="form-control-admin" placeholder="https://images.unsplash.com/..." />
+                    </div>
+                    <div style="margin-top:1.5rem; display:flex; gap:1rem;">
+                        <button type="submit" class="btn-admin">
+                            <i class="fa @(isEdit ? "fa-floppy-disk" : "fa-plus")"></i> @(isEdit ? "Save Changes" : "Add Product")
+                        </button>
+                        <a href="/Admin/Products" class="btn-admin" style="background:var(--warm-gray);">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </main>
+</div>
+</body>
+</html>

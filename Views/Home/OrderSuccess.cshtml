@@ -1,0 +1,16 @@
+@{
+    ViewData["Title"] = "Order Placed!";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="success-page" style="padding-top:72px;">
+    <div class="success-card">
+        <div class="success-icon"><i class="fa fa-circle-check"></i></div>
+        <h2>Order Confirmed!</h2>
+        <p>Thank you for your purchase. Your order <strong style="color:var(--gold);">#@ViewBag.OrderId</strong> has been placed successfully and is being processed. You'll receive a confirmation email shortly.</p>
+        <div style="display:flex; gap:1rem; justify-content:center; flex-wrap:wrap;">
+            <a href="/Home/Shop" class="btn-primary">Continue Shopping</a>
+            <a href="/" class="btn-outline" style="color:var(--bone); border-color:rgba(245,240,234,0.3);">Back to Home</a>
+        </div>
+    </div>
+</div>
